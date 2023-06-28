@@ -1,0 +1,103 @@
+<table class="table table-hover attr-table">
+    <tr>
+        <th scope="row">Region</th>
+        <td>
+            {% if object.site.region %}
+                {% for region in object.site.region.get_ancestors %}
+                    {{ region|linkify }} /
+                {% endfor %}
+                {{ object.site.region|linkify }}
+            {% else %}
+                {{ ''|placeholder }}
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th scope="row">Site</th>
+        <td>{{ object.site|linkify }}</td>
+    </tr>
+    <tr>
+        <th scope="row">Location</th>
+        <td>
+        {% if object.location %}
+            {% for location in object.location.get_ancestors %}
+                {{ location|linkify }} /
+            {% endfor %}
+            {{ object.location|linkify }}
+        {% else %}
+            {{ ''|placeholder }}
+        {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th scope="row">Rack</th>
+        <td class="position-relative">
+            {% if object.rack %}
+                {{ object.rack|linkify }}
+                <div class="position-absolute top-50 end-0 translate-middle-y noprint">
+                  <a href="{{ object.rack.get_absolute_url }}?device={{ object.pk }}" class="btn btn-primary btn-sm" title="Highlight device">
+                    <i class="mdi mdi-view-day-outline"></i>
+                  </a>
+                </div>
+            {% else %}
+                {{ ''|placeholder }}
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th scope="row">Position</th>
+        <td>
+            {% if object.parent_bay %}
+                {% with object.parent_bay.device as parent %}
+                    {{ parent|linkify }} / {{ object.parent_bay }}
+                    {% if parent.position %}
+                        (U{{ parent.position|floatformat }} / {{ parent.get_face_display }})
+                    {% endif %}
+                {% endwith %}
+            {% elif object.rack and object.position %}
+                <span>U{{ object.position|floatformat }} / {{ object.get_face_display }}</span>
+            {% elif object.rack and object.device_type.u_height %}
+                <span class="badge bg-warning">Not racked</span>
+            {% else %}
+                {{ ''|placeholder }}
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th scope="row">Tenant</th>
+        <td>
+            {% if object.tenant.group %}
+                {{ object.tenant.group|linkify }} /
+            {% endif %}
+            {{ object.tenant|linkify|placeholder }}
+        </td>
+    </tr>
+    <tr>
+        <th scope="row">Device Type</th>
+        <td>
+            {{ object.device_type|linkify:"get_full_name" }} ({{ object.device_type.u_height|floatformat }}U)
+        </td>
+    </tr>
+    <tr>
+        <th scope="row">Description</th>
+        <td>{{ object.description|placeholder }}</td>
+    </tr>
+    <tr>
+        <th scope="row">Airflow</th>
+        <td>
+            {{ object.get_airflow_display|placeholder }}
+        </td>
+    </tr>
+    <tr>
+        <th scope="row">Serial Number</th>
+        <td class="font-monospace">{{ object.serial|placeholder }}</td>
+    </tr>
+    <tr>
+        <th scope="row">Asset Tag</th>
+        <td class="font-monospace">{{ object.asset_tag|placeholder }}</td>
+    </tr>
+    <tr>
+        <th scope="row">Config Template</th>
+        <td>{{ object.config_template|linkify|placeholder }}</td>
+    </tr>
+</table>

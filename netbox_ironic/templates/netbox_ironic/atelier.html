@@ -1,0 +1,153 @@
+{% extends 'generic/object.html' %}
+{% load render_table from django_tables2 %}
+
+{% block content %}
+<div class="row mb-3">
+  <div class="col col-md-6">
+    <div class="card">
+      <h5 class="card-header">History</h5>
+      <div class="card-body">
+        {% render_table history 'inc/table.html' %}
+      </div>
+    </div>
+    <div class="card">
+      <h5 class="card-header">Ping</h5>
+      <div class="card-body">
+        <p>TODO</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col col-md-6">
+    <div class="card">
+      <h5 class="card-header">Hardware information</h5>
+      <div class="card-body">
+        <table class="table table-hover attr-table">
+          <tr>
+              <th scope="row">UUID</th>
+              <td>{{ ironic_info.uuid }}</td>
+          </tr>
+          <tr>
+              <th scope="row">Name</th>
+              <td>{{ ironic_info.name }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Power state</th>
+            <td>{{ ironic_info.power_state }} ({{ ironic_info.power_interface }})</td>
+          </tr>
+          <tr>
+            <th scope="row">Maintenance</th>
+            <td>{{ ironic_info.maintenance }} {% if maintenance_reason != None %}({{ ironic_info.maintenance_reason }}){% endif %}</td>
+          </tr>
+          <tr>
+            <th scope="row">Resource Class</th>
+            <td>{{ ironic_info.resource_class }}: {{ ironic_info.properties.cpus }} core ({{ ironic_info.properties.cpu_arch }}) / {{ ironic_info.properties.memory_mb }} MB ram / {{ ironic_info.properties.vendor }}</td>
+          </tr>
+          <tr>
+            <th scope="row">IPMI</th>
+            <td>{{ ironic_info.driver_info.ipmi_address }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Creation Date</th>
+            <td>{{ ironic_info.created_at }}</td>
+          </tr>
+          <tr>
+              <th scope="row">Location</th>
+              <td>
+              {% if object.location %}
+                  {% for location in object.location.get_ancestors %}
+                      {{ location|linkify }} /
+                  {% endfor %}
+                  {{ object.location|linkify }}
+              {% else %}
+                  {{ ''|placeholder }}
+              {% endif %}
+              </td>
+          </tr>
+          <tr>
+              <th scope="row">Rack</th>
+              <td class="position-relative">
+                  {% if object.rack %}
+                      {{ object.rack|linkify }}
+                      <div class="position-absolute top-50 end-0 translate-middle-y noprint">
+                        <a href="{{ object.rack.get_absolute_url }}?device={{ object.pk }}" class="btn btn-primary btn-sm" title="Highlight device">
+                          <i class="mdi mdi-view-day-outline"></i>
+                        </a>
+                      </div>
+                  {% else %}
+                      {{ ''|placeholder }}
+                  {% endif %}
+              </td>
+          </tr>
+          <tr>
+              <th scope="row">Position</th>
+              <td>
+                  {% if object.parent_bay %}
+                      {% with object.parent_bay.device as parent %}
+                          {{ parent|linkify }} / {{ object.parent_bay }}
+                          {% if parent.position %}
+                              (U{{ parent.position|floatformat }} / {{ parent.get_face_display }})
+                          {% endif %}
+                      {% endwith %}
+                  {% elif object.rack and object.position %}
+                      <span>U{{ object.position|floatformat }} / {{ object.get_face_display }}</span>
+                  {% elif object.rack and object.device_type.u_height %}
+                      <span class="badge bg-warning">Not racked</span>
+                  {% else %}
+                      {{ ''|placeholder }}
+                  {% endif %}
+              </td>
+          </tr>
+      </table>
+      </div>
+    </div>
+    {% if nova_info != None %}
+    <div class="card">
+      <h5 class="card-header">Instance information</h5>
+      <div class="card-body">
+        <table class="table table-hover attr-table">
+          <tr>
+              <th scope="row">UUID</th>
+              <td>{{ nova_info.id }}</td>
+          </tr>
+          <tr>
+              <th scope="row">Name</th>
+              <td>{{ nova_info.name }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Status</th>
+            <td>{{ nova_info.status }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Customer project ID</th>
+            <td>{{ nova_info.tenant_id }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Image (OS)</th>
+            <td>{{ nova_info.image.id }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Flavor</th>
+            <td>{{ nova_info.flavor.original_name }} ({{ nova_info.flavor.vcpus }} core/{{ nova_info.flavor.ram }} GB ram/{{ nova_info.flavor.disk }} GB disk)</td>
+          </tr>
+          <tr>
+            <th scope="row">IP Address</th>
+            {% for network, address in nova_info.addresses.items %}
+              <td>{{ network }}: {% for ip in address %}{{ ip.addr }}{% endfor %}</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <th scope="row">Creation Date</th>
+            <td>{{ nova_info.created_at }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Disk boot device</th>
+            <td>/dev/sda</td>
+          </tr>
+      </table>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock content %}
