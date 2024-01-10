@@ -31,7 +31,7 @@
           </tr>
           <tr>
             <th scope="row">Maintenance</th>
-            <td>{{ ironic_info.maintenance }} {% if maintenance_reason != None %}({{ ironic_info.maintenance_reason }}){% endif %}</td>
+            <td>{{ ironic_info.maintenance }} {% if ironic_info.maintenance_reason != None %}({{ ironic_info.maintenance_reason }}){% endif %}</td>
           </tr>
           <tr>
             <th scope="row">Resource Class</th>
