@@ -23,7 +23,11 @@ class AtelierView(generic.ObjectView):
 
     def get_extra_context(self, request, instance):
         os_connector = OpenstackConnector()
-        ironic_info = os_connector.get_ironic_info(list(instance.get_custom_fields().values())[0])
+        baremetal_node_id = None
+        for field, value in list(instance.get_custom_fields()):
+            if field.name == "baremetal_node_id":
+                baremetal_node_id = value
+        ironic_info = os_connector.get_ironic_info(baremetal_node_id)
 
         if ironic_info["instance_uuid"]:
             nova_info = os_connector.get_nova_info(ironic_info["instance_uuid"])
