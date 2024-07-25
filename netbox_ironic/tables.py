@@ -1,9 +1,13 @@
 import django_tables2 as tables
+from django_tables2.utils import Accessor
+from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 from .models import AtelierAction
-from django.conf import settings
 from netbox.tables import NetBoxTable, ChoiceFieldColumn
 
+from dcim.tables.devices import InterfaceTable, DeviceComponentTable, get_interface_row_class, get_interface_state_attribute, get_interface_connected_attribute
+from dcim import models
 
 class AtelierActionTable(NetBoxTable):
     source = ChoiceFieldColumn()
@@ -22,3 +26,49 @@ class AtelierActionTable(NetBoxTable):
         fields = ('time', 'request_id', 'action', 'message', 'owner', 'source')
         default_columns = ('time', 'source', 'action', 'message')
         attrs = {"class": "table-sm"}
+        row_attrs = {"class": lambda record: record.get_source_color()}
+
+class AtelierInterfaceTable(InterfaceTable):
+    def __init__(self, *args, neutron_info=None, network_names, **kwargs):
+        super().__init__(*args, **kwargs)
+        if neutron_info is not None:
+            for item in neutron_info:
+                for record in self.data:
+                    if record.mac_address == item.mac_address:
+                        record.ip_address = item.fixed_ips[0]['ip_address']
+                        record.network_id = item.network_id
+                        record.network_name = network_names[item.network_id]
+                        record.port_id = item['id']
+        
+    name = tables.TemplateColumn(
+        verbose_name=_('Name'),
+        template_code='<i class="mdi mdi-{% if record.mgmt_only %}wrench{% elif record.is_lag %}reorder-horizontal'
+                      '{% elif record.is_virtual %}circle{% elif record.is_wireless %}wifi{% else %}ethernet'
+                      '{% endif %}"></i> <a href="{{ record.get_absolute_url }}">{{ value }}</a>',
+        order_by=Accessor('_name'),
+        attrs={'td': {'class': 'text-nowrap'}}
+    )
+    
+    mac_address = tables.Column(
+        linkify = True
+    )
+    
+    ip_address = tables.Column(
+        verbose_name=_('IP Address')
+    )
+
+    class Meta(DeviceComponentTable.Meta):
+        model = models.Interface
+        fields = (
+            'pk', 'name', 'enabled', 'type', 'mac_address', 'ip_address', 'network_id', 'network_name', 'port_id', 'connection'
+        )
+        default_columns = (
+            'pk', 'name', 'type', 'mac_address', 'ip_address', 'network_id', 'network_name', 'port_id', 'connection'
+        )
+        row_attrs = {
+            'class': get_interface_row_class,
+            'data-name': lambda record: record.name,
+            'data-enabled': get_interface_state_attribute,
+            'data-type': lambda record: record.type,
+            'data-connected': get_interface_connected_attribute
+        }

@@ -20,6 +20,18 @@ class OpenstackConnector:
     def get_ironic_info(self, baremetal_node_uuid):
         return self.conn.baremetal.get_node(baremetal_node_uuid)
 
+    def get_port_info(self, instance_uuid):
+        neutron=self.conn.network
+        return list(neutron.ports(device_id=instance_uuid))
+
+    def get_network_info(self, network_id):
+        neutron=self.conn.network
+        networks = neutron.networks()
+        for network in networks:
+            if network['id'] == network_id:
+                return network
+        return None
+
     def get_nova_info(self, server_id):
         try:
             return self.conn.compute.get_server(server_id)

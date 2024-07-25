@@ -6,7 +6,7 @@ class SourceChoices(ChoiceSet):
 
     CHOICES = [
         ('journal', 'Datacenter', 'blue'),
-        ('changelog', 'Changelog', 'orange'),
+        ('Changelog', 'Changelog', 'orange'),
         ('node', 'Operator', 'red'),
         ('server', 'Customer', 'green')
     ]
@@ -42,3 +42,6 @@ class AtelierAction(NetBoxModel):
 
     def get_absolute_url(self):
         pass
+    
+    def get_source_color(self):
+        return SourceChoices.colors.get(self.source)
