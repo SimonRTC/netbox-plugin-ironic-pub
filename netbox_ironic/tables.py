@@ -35,7 +35,13 @@ class AtelierInterfaceTable(InterfaceTable):
             for item in neutron_info:
                 for record in self.data:
                     if record.mac_address == item.mac_address:
-                        record.ip_address = item.fixed_ips[0]['ip_address']
+                        addresses = ''
+                        for addr in item.fixed_ips:
+                            if addresses == '':
+                                addresses = addresses + addr['ip_address']
+                            else:
+                                addresses = addresses + ' - ' + addr['ip_address']
+                        record.ip_address = addresses
                         record.network_id = item.network_id
                         record.network_name = network_names[item.network_id]
                         record.port_id = item['id']
