@@ -35,13 +35,13 @@ class AtelierInterfaceTable(InterfaceTable):
             for item in neutron_info:
                 for record in self.data:
                     if record.mac_address == item.mac_address:
-                        addresses = ''
+                        addresses = []
                         for addr in item.fixed_ips:
-                            if addresses == '':
-                                addresses = addresses + addr['ip_address']
-                            else:
-                                addresses = addresses + ' - ' + addr['ip_address']
-                        record.ip_address = addresses
+                            addresses.append(addr['ip_address'])
+                        if len(addresses) <= 3:
+                            record.ip_address = {'3first': addresses, 'others': []}
+                        else:
+                            record.ip_address = {'3first': addresses[:3], 'others': addresses[3:]}
                         record.network_id = item.network_id
                         record.network_name = network_names[item.network_id]
                         record.port_id = item['id']
@@ -59,8 +59,20 @@ class AtelierInterfaceTable(InterfaceTable):
         linkify = True
     )
     
-    ip_address = tables.Column(
-        verbose_name=_('IP Address')
+    ip_address = tables.TemplateColumn(
+        verbose_name=_('IP Address'),
+        template_code='{% if record.ip_address.others|length > 0 %}'
+                      '    <details>'
+                      '        <summary>{{ record.ip_address.3first|join:" - " }} ({{ record.ip_address.others|length }} other(s))</summary>'
+                      '        <div>{{ record.ip_address.others|join:" - " }}</div>'
+                      '    </details>'
+                      '{% else %}'
+                      '{% if record.ip_address.3first|length > 0 %}'
+                      '    <div>{{ record.ip_address.3first|join:" - " }}</div>'
+                      '{% else %}'
+                      '—'
+                      '{% endif %}'
+                      '{% endif %}'
     )
 
     class Meta(DeviceComponentTable.Meta):
