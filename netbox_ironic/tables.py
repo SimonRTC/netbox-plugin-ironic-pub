@@ -55,10 +55,6 @@ class AtelierInterfaceTable(InterfaceTable):
         attrs={'td': {'class': 'text-nowrap'}}
     )
     
-    mac_address = tables.Column(
-        linkify = True
-    )
-    
     ip_address = tables.TemplateColumn(
         verbose_name=_('IP Address'),
         template_code='{% if record.ip_address.others|length > 0 %}'
