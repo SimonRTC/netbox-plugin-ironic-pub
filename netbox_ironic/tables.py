@@ -6,7 +6,7 @@ from django.conf import settings
 from .models import AtelierAction
 from netbox.tables import NetBoxTable, ChoiceFieldColumn
 
-from dcim.tables.devices import InterfaceTable, DeviceComponentTable, get_interface_row_class, get_interface_state_attribute, get_interface_connected_attribute
+from dcim.tables.devices import InterfaceTable, DeviceComponentTable
 from dcim import models
 
 class AtelierActionTable(NetBoxTable):
@@ -91,9 +91,10 @@ class AtelierInterfaceTable(InterfaceTable):
             'pk', 'name', 'type', 'mac_address', 'ip_address', 'network_id', 'network_name', 'port_id', 'connection'
         )
         row_attrs = {
-            'class': get_interface_row_class,
             'data-name': lambda record: record.name,
-            'data-enabled': get_interface_state_attribute,
+            'data-enabled': lambda record: "enabled" if record.enabled else "disabled",
+            'data-virtual': lambda record: "true" if record.is_virtual else "false",
+            'data-mark-connected': lambda record: "true" if record.mark_connected else "false",
+            'data-cable-status': lambda record: record.cable.status if record.cable else "",
             'data-type': lambda record: record.type,
-            'data-connected': get_interface_connected_attribute
         }

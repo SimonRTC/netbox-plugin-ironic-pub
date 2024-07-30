@@ -67,9 +67,10 @@ class AtelierView(generic.ObjectView):
             nova_info = os_connector.get_nova_info(ironic_info["instance_uuid"])
             neutron_info = os_connector.get_port_info(ironic_info["instance_uuid"])
             if neutron_info is not None:
+                network_ids = list(set([item.network_id for item in neutron_info]))
                 network_names = {}
-                for item in neutron_info:
-                    network_names[item.network_id] = os_connector.get_network_info(item.network_id)['name']
+                for network_id in network_ids:
+                    network_names[network_id] = os_connector.get_network_info(network_id)['name']
         else:
             nova_info = None
             neutron_info = None
@@ -132,16 +133,14 @@ class AtelierView(generic.ObjectView):
         atelier_actions_table = AtelierActionTable(atelier_actions)
 
         hostname = urlparse(get_plugin_config('netbox_ironic', 'OS_AUTH_URL')).hostname
-        split = hostname.split('.')
-        horizon_url = 'https://horizon'
-        for item in split[1:]:
-            horizon_url = horizon_url + '.' + item
-        horizon_url = horizon_url + '/admin/ironic/' + str(baremetal_node_id)
+        horizon_hostname = hostname.replace('keystone', 'horizon')
+        horizon_url = f'https://{horizon_hostname}/admin/ironic/{str(baremetal_node_id)}'
         
         atelier_id = settings.PLUGINS_CONFIG['netbox_ironic'].get('ATELIER_PROPERTY_NAME')
         atelier_url = None
         if "properties" in ironic_info and atelier_id in ironic_info["properties"]:
-            atelier_url = settings.PLUGINS_CONFIG['netbox_ironic'].get('ATELIER_PREFIX_URL') + str(ironic_info["properties"][atelier_id])
+            atelier_prefix = settings.PLUGINS_CONFIG['netbox_ironic'].get('ATELIER_PREFIX_URL')
+            atelier_url = f'{atelier_prefix}{str(ironic_info["properties"][atelier_id])}'
         
         interface_table = AtelierInterfaceTable(instance.vc_interfaces(if_master=False), neutron_info=neutron_info, network_names=network_names)
         return {
