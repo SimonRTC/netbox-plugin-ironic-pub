@@ -3,12 +3,14 @@
 
 {% block content %}
 
+{% if error == False %}
 <div class="row mb-3">
   <div class="col col-md-6">
     <div class="card">
       <h5 class="card-header">History</h5>
-      <div class="card-body">
+      <div class="card-body table-responsive">
         {% render_table history 'inc/table.html' %}
+        {% include 'inc/paginator.html' with paginator=history.paginator page=history.page %}
       </div>
     </div>
   </div>
@@ -169,5 +171,5 @@
     <a>{% render_table interfaces %}</a>
   </div>
 </div>
-
+{% endif %}
 {% endblock content %}

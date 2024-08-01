@@ -25,7 +25,7 @@ class AtelierActionTable(NetBoxTable):
         model = AtelierAction
         fields = ('time', 'request_id', 'action', 'message', 'owner', 'source')
         default_columns = ('time', 'source', 'action', 'message')
-        attrs = {"class": "table-sm"}
+        attrs = {"class": "table table-hover object-list"}
         row_attrs = {"class": lambda record: record.get_source_color()}
 
 class AtelierInterfaceTable(InterfaceTable):
