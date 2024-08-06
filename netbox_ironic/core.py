@@ -39,11 +39,7 @@ class OpenstackConnector:
     def get_network_info(self, network_id):
         try:
             neutron=self.conn.network
-            networks = neutron.networks()
-            for network in networks:
-                if network['id'] == network_id:
-                    return network
-            return None
+            return neutron.get_network(network_id)
         except SDKException as e:
             raise AtelierException(messages.WARNING, 'Neutron (networks)', e)
 
