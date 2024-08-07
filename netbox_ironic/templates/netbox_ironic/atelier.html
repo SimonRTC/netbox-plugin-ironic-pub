@@ -2,17 +2,37 @@
 {% load render_table from django_tables2 %}
 
 {% block content %}
+
+{% if error == False %}
 <div class="row mb-3">
   <div class="col col-md-6">
     <div class="card">
       <h5 class="card-header">History</h5>
-      <div class="card-body">
+      <div class="card-body table-responsive">
         {% render_table history 'inc/table.html' %}
+        {% include 'inc/paginator.html' with paginator=history.paginator page=history.page %}
       </div>
     </div>
   </div>
 
   <div class="col col-md-6">
+    <div class="card">
+      <h5 class="card-header">Links</h5>
+      <div class="card-body" style="display: flex; flex-direction: row;">
+        <div class="controls">
+          <div class="control-group">
+            <a class="btn btn-sm btn-success" role="button" href="{{ horizon_url }}" target="_blank" rel="noopener noreferrer" style="background-color: #0050D7;">
+              <i class="mdi mdi-forward"></i>
+            Horizon</a>
+            {% if atelier_url != None %}
+            <a class="btn btn-sm btn-success" role="button" href="{{ atelier_url }}" target="_blank" rel="noopener noreferrer" style="background-color: #0050D7;">
+              <i class="mdi mdi-forward"></i>
+            Atelier</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="card">
       <h5 class="card-header">Hardware information</h5>
       <div class="card-body">
@@ -144,4 +164,12 @@
     {% endif %}
   </div>
 </div>
+
+<div class="card">
+  <h5 class="card-header">Interface information</h5>
+  <div class="card-body">
+    <a>{% render_table interfaces %}</a>
+  </div>
+</div>
+{% endif %}
 {% endblock content %}
