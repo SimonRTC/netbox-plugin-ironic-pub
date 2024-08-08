@@ -15,5 +15,6 @@ class NetBoxIronicConfig(PluginConfig):
         'OS_BAREMETAL_ENDPOINT_OVERRIDE': '',
         'OS_COMPUTE_ENDPOINT_OVERRIDE': '',
     }
+    middleware = ['netbox_ironic.middleware.NovaIdMiddleware', 'netbox_ironic.middleware.NeutronIpMiddleware']
 
 config = NetBoxIronicConfig
