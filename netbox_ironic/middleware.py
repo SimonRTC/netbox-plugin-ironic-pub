@@ -8,9 +8,9 @@ class NovaIdMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.get_full_path().startswith('/search/') and 'q' in request.GET:
+        if request.get_full_path().startswith('/search') and 'q' in request.GET:
             request_body = request.GET['q']
-            if is_valid_uuid(request_body, 4):
+            if is_valid_uuid(request_body):
                 try:
                     os_connector = OpenstackConnector()
                     id = os_connector.get_baremetal_node_id_from_nova(request_body)
@@ -29,12 +29,12 @@ class NeutronIpMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.get_full_path().startswith('/search/') and 'q' in request.GET:
+        if request.get_full_path().startswith('/search') and 'q' in request.GET:
             request_body = request.GET['q']
             if is_valid_ipv4(request_body):
                 try:
                     os_connector = OpenstackConnector()
-                    ids = os_connector.get_baremetal_node_id_from_neutron(request_body)
+                    ids = os_connector.get_baremetal_node_ids_from_neutron(request_body)
                     if ids is not []:
                         new_request_get = request.GET.copy()
                         new_request_get['q'] = '|'.join(id for id in ids)

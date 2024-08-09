@@ -44,6 +44,18 @@ class OpenstackConnector:
         except SDKException as e:
             raise AtelierException(messages.WARNING, 'Neutron (networks)', e)
 
+    def get_baremetal_node_ids_from_neutron(self, ip_address):
+        try:
+            neutron=self.conn.network
+            ports = neutron.ports(fixed_ips=f'ip_address={ip_address}')
+            ids = []
+            for port in ports:
+                if is_valid_uuid(port['binding:host_id']):
+                    ids.append(port['binding:host_id'])
+            return ids
+        except SDKException as e:
+            raise AtelierException(messages.WARNING, 'Neutron', e)
+
     def get_nova_info(self, server_id):
         try:
             return self.conn.compute.get_server(server_id)
@@ -58,18 +70,6 @@ class OpenstackConnector:
             return None
         except SDKException as e:
             raise AtelierException(messages.WARNING, 'Nova', e)
-
-    def get_baremetal_node_id_from_neutron(self, ip_address):
-        try:
-            neutron=self.conn.network
-            ports = list(neutron.ports(fixed_ips=f'ip_address={ip_address}'))
-            ids = []
-            for port in ports:
-                if is_valid_uuid(port['binding:host_id']):
-                    ids.append(port['binding:host_id'])
-            return ids
-        except SDKException as e:
-            raise AtelierException(messages.WARNING, 'Neutron', e)
 
     def get_server_actions(self, server_id):
         try:

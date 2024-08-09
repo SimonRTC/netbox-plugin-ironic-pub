@@ -1,5 +1,5 @@
 from uuid import UUID
-import socket
+from ipaddress import ip_address, IPv4Address
 
 def get_baremetal_node_id(instance):
     baremetal_node_id = None
@@ -16,11 +16,7 @@ def is_valid_uuid(uuid_to_test, version=4):
     return True
 
 def is_valid_ipv4(ip_to_test):
-    segments = ip_to_test.split('.')
-    if len(segments) != 4 :
-        return False
     try:
-        socket.inet_aton(ip_to_test)
-    except socket.error:
+        return type(ip_address(ip_to_test))==IPv4Address
+    except ValueError:
         return False
-    return True
