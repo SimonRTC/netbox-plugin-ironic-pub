@@ -3,6 +3,7 @@ from openstack.exceptions import SDKException
 from .exception import AtelierException
 from .utils import is_valid_uuid
 from django.contrib import messages
+from django.conf import settings
 
 from extras.plugins import get_plugin_config
 
@@ -29,6 +30,27 @@ class OpenstackConnector:
             return self.conn.baremetal.get_node(baremetal_node_uuid)
         except SDKException as e:
             raise AtelierException(messages.WARNING, 'Ironic', e)
+    
+    def check_paris(self, node):
+        try:
+            if node['provision_state'] != 'manageable':
+                self.conn.baremetal.set_node_provision_state(node, 'manage', wait=True)
+            if node['maintenance'] :
+                self.conn.baremetal.unset_node_maintenance(node)
+            if settings.PLUGINS_CONFIG['netbox_ironic'].get('IRONIC_BENCH_METADATA') in node['driver_info']:
+                self.conn.baremetal.set_node_provision_state(node, 'clean', clean_steps=[{"step": "hardware_bench", "interface": "deploy"}], wait=True)
+        except SDKException as e:
+            raise AtelierException(messages.WARNING, 'Ironic', e)
+    
+    def toggle_maintenance(self, node):
+        try:
+            if node['maintenance'] :
+                self.conn.baremetal.unset_node_maintenance(node)
+            else :
+                self.conn.baremetal.set_node_maintenance(node)
+        except SDKException as e:
+            raise AtelierException(messages.WARNING, 'Ironic', e)
+        
 
     def get_port_info(self, instance_uuid):
         try:

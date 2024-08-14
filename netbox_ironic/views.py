@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
 from django.db.models import Q
 from django.conf import settings
+from django.shortcuts import redirect
 from dcim.models import Device
 from netbox.views import generic
 from extras.models import ObjectChange, JournalEntry
@@ -79,6 +80,25 @@ class AtelierView(generic.ObjectView):
                 raise e
         return self._ironic_info
     
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('action') == 'check_paris':
+            try :
+                if request.POST.get('baremetal_node_id'):
+                    self._baremetal_node_id = request.POST.get('baremetal_node_id')
+                    self.os_connector.check_paris(self.ironic_info)
+            except AtelierException as e:
+                messages.add_message(request, e.type, e.message)
+            return redirect(request.build_absolute_uri())
+        
+        if request.POST.get('action') == 'toggle_maintenance':
+            try:
+                if request.POST.get('baremetal_node_id'):
+                    self._baremetal_node_id = request.POST.get('baremetal_node_id')
+                    self.os_connector.toggle_maintenance(self.ironic_info)
+            except AtelierException as e:
+                messages.add_message(request, e.type, e.message)
+            return redirect(request.build_absolute_uri())
+    
     def get_extra_context(self, request, instance):
         to_return = {}
         
@@ -93,6 +113,7 @@ class AtelierView(generic.ObjectView):
         to_return['error'] = False
         atelier_actions = []
         self._baremetal_node_id = get_baremetal_node_id(instance)
+        hostname = urlparse(get_plugin_config('netbox_ironic', 'OS_AUTH_URL')).hostname
         
         # Try for ironic info        
         try:
@@ -113,6 +134,9 @@ class AtelierView(generic.ObjectView):
                 atelier_prefix = settings.PLUGINS_CONFIG['netbox_ironic'].get('ATELIER_PREFIX_URL')
                 atelier_url = f'{atelier_prefix}{str(self.ironic_info["properties"][atelier_id])}'
             to_return['atelier_url'] = atelier_url
+            
+            kvm_hostname = hostname.replace('keystone', 'kvm')
+            to_return['kvm_url'] = f'https://{kvm_hostname}/?node={self.ironic_info["name"]}'
         except AtelierException as e:
             instance_uuid = None
             to_return['ironic_info'] = None
@@ -201,7 +225,6 @@ class AtelierView(generic.ObjectView):
         }
         RequestConfig(request, paginate=paginate).configure(atelier_actions_table)
 
-        hostname = urlparse(get_plugin_config('netbox_ironic', 'OS_AUTH_URL')).hostname
         horizon_hostname = hostname.replace('keystone', 'horizon')
         to_return['horizon_url'] = f'https://{horizon_hostname}/admin/ironic/{str(self._baremetal_node_id)}'
         
