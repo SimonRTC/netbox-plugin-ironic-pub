@@ -21,14 +21,33 @@
       <div class="card-body" style="display: flex; flex-direction: row;">
         <div class="controls">
           <div class="control-group">
-            <a class="btn btn-sm btn-success" role="button" href="{{ horizon_url }}" target="_blank" rel="noopener noreferrer" style="background-color: #0050D7;">
-              <i class="mdi mdi-forward"></i>
-            Horizon</a>
             {% if atelier_url != None %}
             <a class="btn btn-sm btn-success" role="button" href="{{ atelier_url }}" target="_blank" rel="noopener noreferrer" style="background-color: #0050D7;">
               <i class="mdi mdi-forward"></i>
             Atelier</a>
             {% endif %}
+            <form action="" method='post'>
+              {% csrf_token %}
+              <input type="hidden" name="action" value="check_paris">
+              <input type="hidden" name="baremetal_node_id" value={{ ironic_info.uuid }}>
+              <button class="btn btn-sm btn-success" role="button"  style="background-color: #0050D7;">
+                <i class="mdi mdi-forward"></i>
+              Checkparis</button>
+            </form>
+            <a class="btn btn-sm btn-success" role="button" href="{{ horizon_url }}" target="_blank" rel="noopener noreferrer" style="background-color: #0050D7;">
+              <i class="mdi mdi-forward"></i>
+            Horizon</a>
+            <a class="btn btn-sm btn-success" role="button" href="{{ kvm_url }}" target="_blank" rel="noopener noreferrer" style="background-color: #0050D7;">
+              <i class="mdi mdi-forward"></i>
+            KVM</a>
+            <form action="" method='post'>
+              {% csrf_token %}
+              <input type="hidden" name="action" value="toggle_maintenance">
+              <input type="hidden" name="baremetal_node_id" value={{ ironic_info.uuid }}>
+              <button class="btn btn-sm btn-success" role="button"  style="background-color: #0050D7;">
+                <i class="mdi mdi-forward"></i>
+              {% if ironic_info.maintenance %} Maintenance OFF {% else %} Maintenance ON {% endif %}</button>
+            </form>
           </div>
         </div>
       </div>
