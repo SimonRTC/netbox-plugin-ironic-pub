@@ -7,7 +7,8 @@ from django.conf import settings
 from django.shortcuts import redirect
 from dcim.models import Device
 from netbox.views import generic
-from extras.models import ObjectChange, JournalEntry
+from core.models import ObjectChange
+from extras.models import JournalEntry
 from utilities.paginator import EnhancedPaginator
 from utilities.views import ViewTab, register_model_view
 from .core import OpenstackConnector
@@ -16,7 +17,7 @@ from .models import AtelierAction
 from .utils import get_baremetal_node_id
 from .exception import AtelierException
 from urllib.parse import urlparse
-from extras.plugins import get_plugin_config
+from netbox.plugins import get_plugin_config
 
 
 class AtelierViewTab(ViewTab):
@@ -52,7 +53,7 @@ class AtelierView(generic.ObjectView):
     tab = AtelierViewTab(
         label='Atelier',
         weight=200,
-        hide_if_empty=True
+        hide_if_empty=False
     )
 
     def __init__(self):

@@ -3,7 +3,7 @@ To customize a built-in NetBox component in a plugin, define a `ready(self)` fun
 Here is an example with the `__init__.py` file of the `netbox_ironic` plugin that overrides the behavior of the NetBox search bar by modifying the `get` method to support a `|` operator for all types of search requests:
 
 ```python
-from extras.plugins import PluginConfig
+from netbox.plugins import PluginConfig
 
 class NetBoxIronicConfig(PluginConfig):
     name = 'netbox_ironic'

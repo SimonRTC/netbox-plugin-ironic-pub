@@ -5,7 +5,7 @@ from .utils import is_valid_uuid
 from django.contrib import messages
 from django.conf import settings
 
-from extras.plugins import get_plugin_config
+from netbox.plugins import get_plugin_config
 
 class OpenstackConnector:
 
