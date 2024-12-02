@@ -121,12 +121,22 @@ class AtelierView(generic.ObjectView):
             to_return['ironic_info'] = self.ironic_info
             instance_uuid = self.ironic_info["instance_uuid"]
             for node_action in self.os_connector.get_node_actions(self.ironic_info):
-                action = AtelierAction(time=datetime.strptime(node_action['created_at'], "%Y-%m-%dT%H:%M:%S.%f%z"),
-                                       request_id=node_action['uuid'],
-                                       action=node_action['severity'].lower(),
-                                       message=node_action['event'],
-                                       owner='ironic',
-                                       source='node')
+                
+                # Try parsing without fractional seconds
+                try:
+                    timestamp = datetime.strptime(node_action['created_at'], "%Y-%m-%dT%H:%M:%S%z")
+                except ValueError:
+                    timestamp = datetime.strptime(node_action['created_at'], "%Y-%m-%dT%H:%M:%S.%f%z")
+
+                action = AtelierAction(
+                    time=timestamp,
+                    request_id=node_action['uuid'],
+                    action=node_action['severity'].lower(),
+                    message=node_action['event'],
+                    owner='ironic',
+                    source='node'
+                )
+                
                 atelier_actions.append(action)
         
             atelier_id = settings.PLUGINS_CONFIG['netbox_ironic'].get('ATELIER_PROPERTY_NAME')
