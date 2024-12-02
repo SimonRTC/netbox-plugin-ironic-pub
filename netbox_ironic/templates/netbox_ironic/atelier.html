@@ -18,35 +18,48 @@
   <div class="col col-md-6">
     <div class="card">
       <h5 class="card-header">Links</h5>
-      <div class="card-body" style="display: flex; flex-direction: row;">
-        <div class="controls">
-          <div class="control-group">
-            {% if atelier_url != None %}
-            <a class="btn btn-sm btn-success" role="button" href="{{ atelier_url }}" target="_blank" rel="noopener noreferrer" style="background-color: #0050D7;">
-              <i class="mdi mdi-forward"></i>
-            Atelier</a>
-            {% endif %}
+      <div class="card-body">
+        <div class="d-flex justify-content-center">
+          {% if atelier_url != None %}
+            <div class="p-2">
+              <a class="btn btn-sm btn-success" role="button" href="{{ atelier_url }}" target="_blank" rel="noopener noreferrer" style="background-color: #0050D7;">
+                <i class="mdi mdi-forward"></i>
+                Atelier
+              </a>
+            </div>
+          {% endif %}
+          <div class="p-2">
             <form action="" method='post'>
               {% csrf_token %}
               <input type="hidden" name="action" value="check_paris">
               <input type="hidden" name="baremetal_node_id" value={{ ironic_info.uuid }}>
               <button class="btn btn-sm btn-success" role="button"  style="background-color: #0050D7;">
                 <i class="mdi mdi-forward"></i>
-              Checkparis</button>
+                Checkparis
+              </button>
             </form>
+          </div>
+          <div class="p-2">
             <a class="btn btn-sm btn-success" role="button" href="{{ horizon_url }}" target="_blank" rel="noopener noreferrer" style="background-color: #0050D7;">
               <i class="mdi mdi-forward"></i>
-            Horizon</a>
+              Horizon
+            </a>
+          </div>
+          <div class="p-2">
             <a class="btn btn-sm btn-success" role="button" href="{{ kvm_url }}" target="_blank" rel="noopener noreferrer" style="background-color: #0050D7;">
               <i class="mdi mdi-forward"></i>
-            KVM</a>
+              KVM
+            </a>
+          </div>
+          <div class="p-2">
             <form action="" method='post'>
               {% csrf_token %}
               <input type="hidden" name="action" value="toggle_maintenance">
               <input type="hidden" name="baremetal_node_id" value={{ ironic_info.uuid }}>
               <button class="btn btn-sm btn-success" role="button"  style="background-color: #0050D7;">
                 <i class="mdi mdi-forward"></i>
-              {% if ironic_info.maintenance %} Maintenance OFF {% else %} Maintenance ON {% endif %}</button>
+                {% if ironic_info.maintenance %} Maintenance OFF {% else %} Maintenance ON {% endif %}
+              </button>
             </form>
           </div>
         </div>
